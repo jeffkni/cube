@@ -15,7 +15,8 @@ describe("GraphQLDriver", () => {
   let container2: StartedTestContainer;
   let network: StartedNetwork;
 
-  jest.setTimeout(2 * 60 * 1000);
+  //jest.setTimeout(2 * 60 * 1000);
+  jest.setTimeout(50000);
 
   beforeAll(async () => {
     network = await new Network().start();
@@ -63,16 +64,15 @@ describe("GraphQLDriver", () => {
   test("First Test", async () => {
     const driver = new GraphQLDriver();
     const query = `{
-             result: allVisitors {
-               nodes {
-                 id
-                 amount
-                 status
-               }
-             }`;
-    console.log("running query ...");
+      allVisitors {
+        nodes {
+          id
+          amount
+          status
+        }
+      }
+    }`;
     const result = await driver.query(query, []);
-    console.log("got json: ", JSON.stringify(result));
     expect(result).toEqual([
       { id: 1, amount: 100, status: 1 },
       { id: 2, amount: 200, status: 1 },

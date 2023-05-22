@@ -28,7 +28,7 @@ export class GraphQLDriver extends BaseDriver {
       }
     );
     console.log(`query ${query} / values: ${values}`);
-    return result.data?.data?.result.nodes;
+    return result.data?.data?.allVisitors?.nodes;
     /*
     Set of options (pros / cons)
     - connect with graphl driver (TBD)
@@ -37,6 +37,5 @@ export class GraphQLDriver extends BaseDriver {
     - connect directly to dbs 
     - ~"lake house" 
     */
-    return [];
   }
 }
