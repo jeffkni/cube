@@ -178,6 +178,7 @@ class BaseQuery {
   }
 
   initFromOptions() {
+    console.log('initFromOptions - BEGIN');
     this.contextSymbols = {
       securityContext: {},
       ...this.options.contextSymbols,
@@ -252,6 +253,7 @@ class BaseQuery {
 
     this.externalQueryClass = this.options.externalQueryClass;
     this.initUngrouped();
+    console.log('initFromOptions - COMPLETE');
   }
 
   cacheValue(key, fn, { contextPropNames, inputProps, cache } = {}) {

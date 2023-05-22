@@ -5,17 +5,16 @@ import {
   GenericContainer,
   Wait,
 } from "testcontainers";
-//import { DriverTests } from "@cubejs-backend/testing-shared";
-import GraphQLDriver from "../src";
-
+// import { DriverTests } from "@cubejs-backend/testing-shared";
 import { CubeGraphQLConverter } from "@cubejs-client/playground/src/components/GraphQL/CubeGraphQLConverter";
+import GraphQLDriver from "../src";
 
 describe("GraphQLDriver", () => {
   let container: StartedTestContainer;
   let container2: StartedTestContainer;
   let network: StartedNetwork;
 
-  //jest.setTimeout(2 * 60 * 1000);
+  // jest.setTimeout(2 * 60 * 1000);
   jest.setTimeout(50000);
 
   beforeAll(async () => {
@@ -56,9 +55,9 @@ describe("GraphQLDriver", () => {
 
     console.log("container 2 days", container2.exec(["hostname", "uptime"]));
 
-    //tests = new DriverTests(new GraphQLDriver(), j^i{
+    // tests = new DriverTests(new GraphQLDriver(), j^i{
     //  expectStringFields: true,
-    //});
+    // });
   });
 
   test("First Test", async () => {
@@ -83,7 +82,7 @@ describe("GraphQLDriver", () => {
     ]);
   });
 
-  /* 
+  /*
   Conversion possibly via
   ../../cubejs-playground/src/components/GraphQL/CubeGraphQLConverter';
   */
