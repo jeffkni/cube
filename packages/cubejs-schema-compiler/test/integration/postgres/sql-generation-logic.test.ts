@@ -1,9 +1,9 @@
-import { UserError } from '../../../src/compiler/UserError';
-import { PostgresQuery } from '../../../src/adapter/PostgresQuery';
-import { prepareCompiler } from '../../unit/PrepareCompiler';
-import { dbRunner } from './PostgresDBRunner';
+import { UserError } from "../../../src/compiler/UserError";
+import { PostgresQuery } from "../../../src/adapter/PostgresQuery";
+import { prepareCompiler } from "../../unit/PrepareCompiler";
+import { dbRunner } from "./PostgresDBRunner";
 
-describe('SQL Generation', () => {
+describe("SQL Generation", () => {
   jest.setTimeout(200000);
 
   const { compiler, joinGraph, cubeEvaluator } = prepareCompiler(`
@@ -382,71 +382,65 @@ describe('SQL Generation', () => {
     })
   `);
 
-  it('filter with operator OR', async () => {
+  it("filter with operator OR", async () => {
     await compiler.compile();
 
-    const query = new PostgresQuery({ joinGraph, cubeEvaluator, compiler }, {
-      measures: [
-        'visitor_checkins.google_sourced_checkins'
-      ],
-      timeDimensions: [],
-      filters: [
-        {
-          or: [
-            { dimension: 'cards.id', operator: 'equals', values: ['3'] },
-            { dimension: 'cards.id', operator: 'equals', values: ['1'] }
-          ]
-        },
-      ],
-      timezone: 'America/Los_Angeles'
-    });
+    const query = new PostgresQuery(
+      { joinGraph, cubeEvaluator, compiler },
+      {
+        measures: ["visitor_checkins.google_sourced_checkins"],
+        timeDimensions: [],
+        filters: [
+          {
+            or: [
+              { dimension: "cards.id", operator: "equals", values: ["3"] },
+              { dimension: "cards.id", operator: "equals", values: ["1"] },
+            ],
+          },
+        ],
+        timezone: "America/Los_Angeles",
+      }
+    );
 
     console.log(query.buildSqlAndParams());
 
-    return dbRunner.testQuery(query.buildSqlAndParams()).then(res => {
+    return dbRunner.testQuery(query.buildSqlAndParams()).then((res) => {
       console.log(JSON.stringify(res));
-      expect(res).toEqual(
-        [{ visitor_checkins__google_sourced_checkins: '1' }]
-      );
+      expect(res).toEqual([{ visitor_checkins__google_sourced_checkins: "1" }]);
     });
   });
 
-  it('having and where filter in same operator OR', async () => {
+  it("having and where filter in same operator OR", async () => {
     await compiler.compile();
 
     try {
       // eslint-disable-next-line no-new
-      new PostgresQuery({ joinGraph, cubeEvaluator, compiler }, {
-        measures: [
-          'visitors.visitor_count'
-        ],
-        order: {
-          'visitors.visitor_count': 'desc'
-        },
-        filters: [
-          {
-            or: [
-              {
-                dimension: 'visitors.visitor_count',
-                operator: 'gt',
-                values: [
-                  '1'
-                ]
-              },
-              {
-                dimension: 'visitors.source',
-                operator: 'equals',
-                values: [
-                  'google'
-                ]
-              }
-            ]
+      new PostgresQuery(
+        { joinGraph, cubeEvaluator, compiler },
+        {
+          measures: ["visitors.visitor_count"],
+          order: {
+            "visitors.visitor_count": "desc",
           },
-        ],
-        dimensions: [
-          'visitors.source'
-        ]
-      });
+          filters: [
+            {
+              or: [
+                {
+                  dimension: "visitors.visitor_count",
+                  operator: "gt",
+                  values: ["1"],
+                },
+                {
+                  dimension: "visitors.source",
+                  operator: "equals",
+                  values: ["google"],
+                },
+              ],
+            },
+          ],
+          dimensions: ["visitors.source"],
+        }
+      );
 
       throw new Error();
     } catch (error) {
@@ -455,538 +449,581 @@ describe('SQL Generation', () => {
     }
   });
 
-  it('having filter with operator OR', async () => {
+  it("having filter with operator OR", async () => {
     await compiler.compile();
 
-    const query = new PostgresQuery({ joinGraph, cubeEvaluator, compiler }, {
-      measures: [
-        'visitors.visitor_count',
-        'cards.count',
-        'visitors.averageCheckins',
-      ],
-      dimensions: [
-        'visitors.source'
-      ],
-      timeDimensions: [],
-      timezone: 'America/Los_Angeles',
-      filters: [{
-        or: [
+    const query = new PostgresQuery(
+      { joinGraph, cubeEvaluator, compiler },
+      {
+        measures: [
+          "visitors.visitor_count",
+          "cards.count",
+          "visitors.averageCheckins",
+        ],
+        dimensions: ["visitors.source"],
+        timeDimensions: [],
+        timezone: "America/Los_Angeles",
+        filters: [
           {
-            dimension: 'cards.count',
-            operator: 'equals',
-            values: ['2']
+            or: [
+              {
+                dimension: "cards.count",
+                operator: "equals",
+                values: ["2"],
+              },
+              {
+                dimension: "visitors.averageCheckins",
+                operator: "equals",
+                values: ["2"],
+              },
+            ],
           },
+        ],
+        order: [
           {
-            dimension: 'visitors.averageCheckins',
-            operator: 'equals',
-            values: ['2']
-          }
-        ]
-      }],
-      order: [{
-        id: 'visitors.source'
-      }]
-    });
+            id: "visitors.source",
+          },
+        ],
+      }
+    );
 
     console.log(query.buildSqlAndParams());
 
-    return dbRunner.testQuery(query.buildSqlAndParams()).then(res => {
+    return dbRunner.testQuery(query.buildSqlAndParams()).then((res) => {
       console.log(JSON.stringify(res));
-      expect(res).toEqual(
-        [{
-          cards__count: '1',
-          visitors__source: 'google',
-          visitors__visitor_count: '1',
-          visitors__average_checkins: '2.0000000000000000'
-        }, {
-          cards__count: '2',
-          visitors__source: 'some',
-          visitors__visitor_count: '1',
-          visitors__average_checkins: '6.0000000000000000'
-        }]
-      );
+      expect(res).toEqual([
+        {
+          cards__count: "1",
+          visitors__source: "google",
+          visitors__visitor_count: "1",
+          visitors__average_checkins: "2.0000000000000000",
+        },
+        {
+          cards__count: "2",
+          visitors__source: "some",
+          visitors__visitor_count: "1",
+          visitors__average_checkins: "6.0000000000000000",
+        },
+      ]);
     });
   });
 
-  it('having filter with operators OR & AND', async () => {
+  it("having filter with operators OR & AND", async () => {
     await compiler.compile();
 
-    const query = new PostgresQuery({ joinGraph, cubeEvaluator, compiler }, {
-      measures: [
-        'visitors.visitor_count',
-        'cards.count',
-        'visitors.averageCheckins',
-      ],
-      dimensions: [
-        'visitors.source'
-      ],
-      timeDimensions: [],
-      timezone: 'America/Los_Angeles',
-      filters: [{
-        or: [
+    const query = new PostgresQuery(
+      { joinGraph, cubeEvaluator, compiler },
+      {
+        measures: [
+          "visitors.visitor_count",
+          "cards.count",
+          "visitors.averageCheckins",
+        ],
+        dimensions: ["visitors.source"],
+        timeDimensions: [],
+        timezone: "America/Los_Angeles",
+        filters: [
           {
-            and: [
+            or: [
               {
-                member: 'cards.count',
-                operator: 'equals',
-                values: ['2']
+                and: [
+                  {
+                    member: "cards.count",
+                    operator: "equals",
+                    values: ["2"],
+                  },
+                  {
+                    member: "visitors.averageCheckins",
+                    operator: "equals",
+                    values: ["6"],
+                  },
+                ],
               },
               {
-                member: 'visitors.averageCheckins',
-                operator: 'equals',
-                values: ['6']
-              }
-            ]
+                and: [
+                  {
+                    member: "cards.count",
+                    operator: "equals",
+                    values: ["1"],
+                  },
+                  {
+                    member: "visitors.averageCheckins",
+                    operator: "equals",
+                    values: ["2"],
+                  },
+                ],
+              },
+            ],
           },
+        ],
+        order: [
           {
-            and: [
-              {
-                member: 'cards.count',
-                operator: 'equals',
-                values: ['1']
-              },
-              {
-                member: 'visitors.averageCheckins',
-                operator: 'equals',
-                values: ['2']
-              }
-            ]
-          }
-        ]
-      }],
-      order: [{
-        id: 'visitors.source'
-      }]
-    });
+            id: "visitors.source",
+          },
+        ],
+      }
+    );
 
     console.log(query.buildSqlAndParams());
 
-    return dbRunner.testQuery(query.buildSqlAndParams()).then(res => {
+    return dbRunner.testQuery(query.buildSqlAndParams()).then((res) => {
       console.log(JSON.stringify(res));
-      expect(res).toEqual(
-        [{
-          cards__count: '1',
-          visitors__source: 'google',
-          visitors__visitor_count: '1',
-          visitors__average_checkins: '2.0000000000000000'
-        }, {
-          cards__count: '2',
-          visitors__source: 'some',
-          visitors__visitor_count: '1',
-          visitors__average_checkins: '6.0000000000000000'
-        }]
-      );
+      expect(res).toEqual([
+        {
+          cards__count: "1",
+          visitors__source: "google",
+          visitors__visitor_count: "1",
+          visitors__average_checkins: "2.0000000000000000",
+        },
+        {
+          cards__count: "2",
+          visitors__source: "some",
+          visitors__visitor_count: "1",
+          visitors__average_checkins: "6.0000000000000000",
+        },
+      ]);
     });
   });
 
-  it('having filter with operators OR & AND (with filter based on measures not from select part clause)', async () => {
+  it("having filter with operators OR & AND (with filter based on measures not from select part clause)", async () => {
     await compiler.compile();
 
-    const query = new PostgresQuery({ joinGraph, cubeEvaluator, compiler }, {
-      measures: [
-        'visitors.visitor_count',
-        // "cards.count",
-        'visitors.averageCheckins',
-      ],
-      dimensions: [
-        'visitors.source'
-      ],
-      timeDimensions: [],
-      timezone: 'America/Los_Angeles',
-      filters: [{
-        or: [
+    const query = new PostgresQuery(
+      { joinGraph, cubeEvaluator, compiler },
+      {
+        measures: [
+          "visitors.visitor_count",
+          // "cards.count",
+          "visitors.averageCheckins",
+        ],
+        dimensions: ["visitors.source"],
+        timeDimensions: [],
+        timezone: "America/Los_Angeles",
+        filters: [
           {
-            and: [
+            or: [
               {
-                member: 'visitors.averageCheckins',
-                operator: 'equals',
-                values: ['6']
+                and: [
+                  {
+                    member: "visitors.averageCheckins",
+                    operator: "equals",
+                    values: ["6"],
+                  },
+                  {
+                    member: "cards.count",
+                    operator: "equals",
+                    values: ["2"],
+                  },
+                ],
               },
               {
-                member: 'cards.count',
-                operator: 'equals',
-                values: ['2']
+                and: [
+                  {
+                    dimension: "visitors.averageCheckins",
+                    operator: "equals",
+                    values: ["2"],
+                  },
+                  {
+                    dimension: "cards.count",
+                    operator: "equals",
+                    values: ["1"],
+                  },
+                ],
               },
-            ]
+            ],
           },
+        ],
+        order: [
           {
-            and: [
-              {
-                dimension: 'visitors.averageCheckins',
-                operator: 'equals',
-                values: ['2']
-              },
-              {
-                dimension: 'cards.count',
-                operator: 'equals',
-                values: ['1']
-              },
-            ]
-          }
-        ]
-      }],
-      order: [{
-        id: 'visitors.source'
-      }]
-    });
+            id: "visitors.source",
+          },
+        ],
+      }
+    );
 
     console.log(query.buildSqlAndParams());
 
-    return dbRunner.testQuery(query.buildSqlAndParams()).then(res => {
+    return dbRunner.testQuery(query.buildSqlAndParams()).then((res) => {
       console.log(JSON.stringify(res));
-      expect(res).toEqual(
-        [{
+      expect(res).toEqual([
+        {
           // "cards__count": "1",
-          visitors__source: 'google',
-          visitors__visitor_count: '1',
-          visitors__average_checkins: '2.0000000000000000'
-        }, {
+          visitors__source: "google",
+          visitors__visitor_count: "1",
+          visitors__average_checkins: "2.0000000000000000",
+        },
+        {
           // "cards__count": "2",
-          visitors__source: 'some',
-          visitors__visitor_count: '1',
-          visitors__average_checkins: '6.0000000000000000'
-        }]
-      );
+          visitors__source: "some",
+          visitors__visitor_count: "1",
+          visitors__average_checkins: "6.0000000000000000",
+        },
+      ]);
     });
   });
 
-  it('where filter with operators OR & AND', async () => {
+  it("where filter with operators OR & AND", async () => {
     await compiler.compile();
 
-    const query = new PostgresQuery({ joinGraph, cubeEvaluator, compiler }, {
-      measures: [
-        'visitors.visitor_count'
-      ],
-      dimensions: [
-        'visitors.source',
-        'visitor_checkins.cardsCount'
-      ],
-      timeDimensions: [],
-      timezone: 'America/Los_Angeles',
-      filters: [{
-        or: [
+    const query = new PostgresQuery(
+      { joinGraph, cubeEvaluator, compiler },
+      {
+        measures: ["visitors.visitor_count"],
+        dimensions: ["visitors.source", "visitor_checkins.cardsCount"],
+        timeDimensions: [],
+        timezone: "America/Los_Angeles",
+        filters: [
           {
-            and: [
+            or: [
               {
-                dimension: 'visitors.source',
-                operator: 'equals',
-                values: ['some']
+                and: [
+                  {
+                    dimension: "visitors.source",
+                    operator: "equals",
+                    values: ["some"],
+                  },
+                  {
+                    dimension: "visitor_checkins.cardsCount",
+                    operator: "equals",
+                    values: ["0"],
+                  },
+                ],
               },
               {
-                dimension: 'visitor_checkins.cardsCount',
-                operator: 'equals',
-                values: ['0']
+                and: [
+                  {
+                    member: "visitors.source",
+                    operator: "equals",
+                    values: ["google"],
+                  },
+                  {
+                    member: "visitor_checkins.cardsCount",
+                    operator: "equals",
+                    values: ["1"],
+                  },
+                ],
               },
-            ]
+            ],
           },
+        ],
+        order: [
           {
-            and: [
-              {
-                member: 'visitors.source',
-                operator: 'equals',
-                values: ['google']
-              },
-              {
-                member: 'visitor_checkins.cardsCount',
-                operator: 'equals',
-                values: ['1']
-              },
-            ]
-          }
-        ]
-      }],
-      order: [{
-        'visitors.visitor_count': 'desc'
-      }]
-    });
-
-    console.log(query.buildSqlAndParams());
-
-    return dbRunner.testQuery(query.buildSqlAndParams()).then(res => {
-      console.log(JSON.stringify(res));
-      expect(res).toEqual(
-        [{
-          visitors__source: 'google',
-          visitor_checkins__cards_count: '1',
-          visitors__visitor_count: '1',
-        }, {
-          visitors__source: 'some',
-          visitors__visitor_count: '2',
-          visitor_checkins__cards_count: '0'
-        }]
-      );
-    });
-  });
-
-  it('where filter with operators OR & AND (with filter based on dimensions not from select part clause)', async () => {
-    await compiler.compile();
-
-    const query = new PostgresQuery({ joinGraph, cubeEvaluator, compiler }, {
-      measures: [
-        'visitors.visitor_count'
-      ],
-      dimensions: [
-        'visitors.source',
-      ],
-      timeDimensions: [],
-      timezone: 'America/Los_Angeles',
-      filters: [{
-        or: [
-          {
-            and: [
-              {
-                member: 'visitors.source',
-                operator: 'equals',
-                values: ['some']
-              },
-              {
-                dimension: 'visitor_checkins.cardsCount',
-                operator: 'equals',
-                values: ['0']
-              },
-            ]
+            "visitors.visitor_count": "desc",
           },
+        ],
+      }
+    );
+
+    console.log(query.buildSqlAndParams());
+
+    return dbRunner.testQuery(query.buildSqlAndParams()).then((res) => {
+      console.log(JSON.stringify(res));
+      expect(res).toEqual([
+        {
+          visitors__source: "google",
+          visitor_checkins__cards_count: "1",
+          visitors__visitor_count: "1",
+        },
+        {
+          visitors__source: "some",
+          visitors__visitor_count: "2",
+          visitor_checkins__cards_count: "0",
+        },
+      ]);
+    });
+  });
+
+  it("where filter with operators OR & AND (with filter based on dimensions not from select part clause)", async () => {
+    await compiler.compile();
+
+    const query = new PostgresQuery(
+      { joinGraph, cubeEvaluator, compiler },
+      {
+        measures: ["visitors.visitor_count"],
+        dimensions: ["visitors.source"],
+        timeDimensions: [],
+        timezone: "America/Los_Angeles",
+        filters: [
+          {
+            or: [
+              {
+                and: [
+                  {
+                    member: "visitors.source",
+                    operator: "equals",
+                    values: ["some"],
+                  },
+                  {
+                    dimension: "visitor_checkins.cardsCount",
+                    operator: "equals",
+                    values: ["0"],
+                  },
+                ],
+              },
+              {
+                and: [
+                  {
+                    dimension: "visitors.source",
+                    operator: "equals",
+                    values: ["google"],
+                  },
+                  {
+                    member: "visitor_checkins.cardsCount",
+                    operator: "equals",
+                    values: ["1"],
+                  },
+                ],
+              },
+            ],
+          },
+        ],
+        order: [
+          {
+            "visitors.visitor_count": "desc",
+          },
+        ],
+      }
+    );
+
+    console.log(query.buildSqlAndParams());
+
+    return dbRunner.testQuery(query.buildSqlAndParams()).then((res) => {
+      console.log(JSON.stringify(res));
+      expect(res).toEqual([
+        {
+          visitors__source: "google",
+          visitors__visitor_count: "1",
+        },
+        {
+          visitors__source: "some",
+          visitors__visitor_count: "2",
+        },
+      ]);
+    });
+  });
+
+  it("where filter with only one argument", async () => {
+    await compiler.compile();
+
+    const query = new PostgresQuery(
+      { joinGraph, cubeEvaluator, compiler },
+      {
+        measures: ["visitors.visitor_count"],
+        dimensions: ["visitors.source"],
+        timeDimensions: [],
+        timezone: "America/Los_Angeles",
+        filters: [
           {
             and: [
               {
-                dimension: 'visitors.source',
-                operator: 'equals',
-                values: ['google']
+                and: [
+                  {
+                    or: [
+                      {
+                        and: [
+                          {
+                            member: "visitors.source",
+                            operator: "equals",
+                            values: ["some"],
+                          },
+                        ],
+                      },
+                      {
+                        and: [
+                          {
+                            dimension: "visitors.source",
+                            operator: "equals",
+                            values: ["google"],
+                          },
+                        ],
+                      },
+                    ],
+                  },
+                ],
               },
+            ],
+          },
+        ],
+        order: [
+          {
+            "visitors.visitor_count": "desc",
+          },
+        ],
+      }
+    );
+
+    console.log(query.buildSqlAndParams());
+
+    return dbRunner.testQuery(query.buildSqlAndParams()).then((res) => {
+      console.log(JSON.stringify(res));
+      expect(res).toEqual([
+        {
+          visitors__source: "google",
+          visitors__visitor_count: "1",
+        },
+        {
+          visitors__source: "some",
+          visitors__visitor_count: "2",
+        },
+      ]);
+    });
+  });
+
+  it("where filter without arguments", async () => {
+    await compiler.compile();
+
+    const query = new PostgresQuery(
+      { joinGraph, cubeEvaluator, compiler },
+      {
+        measures: ["visitors.visitor_count"],
+        dimensions: ["visitors.source"],
+        timeDimensions: [],
+        timezone: "America/Los_Angeles",
+        filters: [
+          {
+            and: [
               {
-                member: 'visitor_checkins.cardsCount',
-                operator: 'equals',
-                values: ['1']
+                and: [
+                  {
+                    or: [
+                      {
+                        and: [
+                          {
+                            member: "visitors.source",
+                            operator: "equals",
+                            values: ["some"],
+                          },
+                        ],
+                      },
+                      {
+                        and: [],
+                      },
+                    ],
+                  },
+                ],
               },
-            ]
-          }
-        ]
-      }],
-      order: [{
-        'visitors.visitor_count': 'desc'
-      }]
-    });
+            ],
+          },
+        ],
+        order: [
+          {
+            "visitors.visitor_count": "desc",
+          },
+        ],
+      }
+    );
 
     console.log(query.buildSqlAndParams());
 
-    return dbRunner.testQuery(query.buildSqlAndParams()).then(res => {
+    return dbRunner.testQuery(query.buildSqlAndParams()).then((res) => {
       console.log(JSON.stringify(res));
-      expect(res).toEqual(
-        [{
-          visitors__source: 'google',
-          visitors__visitor_count: '1',
-        }, {
-          visitors__source: 'some',
-          visitors__visitor_count: '2',
-        }]
-      );
+      expect(res).toEqual([
+        { visitors__source: "some", visitors__visitor_count: "2" },
+      ]);
     });
   });
 
-  it('where filter with only one argument', async () => {
+  it("where filter without any arguments", async () => {
     await compiler.compile();
 
-    const query = new PostgresQuery({ joinGraph, cubeEvaluator, compiler }, {
-      measures: [
-        'visitors.visitor_count'
-      ],
-      dimensions: [
-        'visitors.source',
-      ],
-      timeDimensions: [],
-      timezone: 'America/Los_Angeles',
-      filters: [
-        {
-          and: [
-            {
-              and: [
-                {
-                  or: [
-                    {
-                      and: [
-                        {
-                          member: 'visitors.source',
-                          operator: 'equals',
-                          values: ['some']
-                        }
-                      ]
-                    },
-                    {
-                      and: [
-                        {
-                          dimension: 'visitors.source',
-                          operator: 'equals',
-                          values: ['google']
-                        }
-                      ]
-                    }
-                  ]
-                }]
-            }]
-        }],
-      order: [{
-        'visitors.visitor_count': 'desc'
-      }]
-    });
+    const query = new PostgresQuery(
+      { joinGraph, cubeEvaluator, compiler },
+      {
+        measures: ["visitors.visitor_count"],
+        dimensions: ["visitors.source"],
+        timeDimensions: [],
+        timezone: "America/Los_Angeles",
+        filters: [
+          {
+            and: [
+              {
+                and: [
+                  {
+                    or: [
+                      {
+                        and: [],
+                      },
+                      {
+                        and: [],
+                      },
+                    ],
+                  },
+                ],
+              },
+            ],
+          },
+        ],
+        order: [
+          {
+            "visitors.visitor_count": "desc",
+          },
+        ],
+      }
+    );
 
     console.log(query.buildSqlAndParams());
 
-    return dbRunner.testQuery(query.buildSqlAndParams()).then(res => {
+    return dbRunner.testQuery(query.buildSqlAndParams()).then((res) => {
       console.log(JSON.stringify(res));
-      expect(res).toEqual(
-        [{
-          visitors__source: 'google',
-          visitors__visitor_count: '1',
-        }, {
-          visitors__source: 'some',
-          visitors__visitor_count: '2',
-        }]
-      );
+      expect(res).toEqual([
+        { visitors__source: null, visitors__visitor_count: "3" },
+        { visitors__source: "google", visitors__visitor_count: "1" },
+        { visitors__source: "some", visitors__visitor_count: "2" },
+      ]);
     });
   });
 
-  it('where filter without arguments', async () => {
-    await compiler.compile();
-
-    const query = new PostgresQuery({ joinGraph, cubeEvaluator, compiler }, {
-      measures: [
-        'visitors.visitor_count'
-      ],
-      dimensions: [
-        'visitors.source',
-      ],
-      timeDimensions: [],
-      timezone: 'America/Los_Angeles',
-      filters: [
-        {
-          and: [
-            {
-              and: [
-                {
-                  or: [
-                    {
-                      and: [
-                        {
-                          member: 'visitors.source',
-                          operator: 'equals',
-                          values: ['some']
-                        }
-                      ]
-                    },
-                    {
-                      and: []
-                    }
-                  ]
-                }]
-            }]
-        }],
-      order: [{
-        'visitors.visitor_count': 'desc'
-      }]
-    });
-
-    console.log(query.buildSqlAndParams());
-
-    return dbRunner.testQuery(query.buildSqlAndParams()).then(res => {
-      console.log(JSON.stringify(res));
-      expect(res).toEqual([{ visitors__source: 'some', visitors__visitor_count: '2' }]);
-    });
-  });
-
-  it('where filter without any arguments', async () => {
-    await compiler.compile();
-
-    const query = new PostgresQuery({ joinGraph, cubeEvaluator, compiler }, {
-      measures: [
-        'visitors.visitor_count'
-      ],
-      dimensions: [
-        'visitors.source',
-      ],
-      timeDimensions: [],
-      timezone: 'America/Los_Angeles',
-      filters: [
-        {
-          and: [
-            {
-              and: [
-                {
-                  or: [
-                    {
-                      and: []
-                    },
-                    {
-                      and: []
-                    }
-                  ]
-                }]
-            }]
-        }],
-      order: [{
-        'visitors.visitor_count': 'desc'
-      }]
-    });
-
-    console.log(query.buildSqlAndParams());
-
-    return dbRunner.testQuery(query.buildSqlAndParams()).then(res => {
-      console.log(JSON.stringify(res));
-      expect(res).toEqual(
-        [
-          { visitors__source: null, visitors__visitor_count: '3' },
-          { visitors__source: 'google', visitors__visitor_count: '1' },
-          { visitors__source: 'some', visitors__visitor_count: '2' }
-        ]
-      );
-    });
-  });
-
-  it('where filter with incorrect one arguments', async () => {
+  it("where filter with incorrect one arguments", async () => {
     await compiler.compile();
 
     try {
       // eslint-disable-next-line no-new
-      new PostgresQuery({ joinGraph, cubeEvaluator, compiler }, {
-        measures: [
-          'visitors.visitor_count'
-        ],
-        dimensions: [
-          'visitors.source',
-        ],
-        timeDimensions: [],
-        timezone: 'America/Los_Angeles',
-        filters: [
-          {
-            and: [
-              { and: [
+      new PostgresQuery(
+        { joinGraph, cubeEvaluator, compiler },
+        {
+          measures: ["visitors.visitor_count"],
+          dimensions: ["visitors.source"],
+          timeDimensions: [],
+          timezone: "America/Los_Angeles",
+          filters: [
+            {
+              and: [
                 {
-                  or: [
+                  and: [
                     {
-                      and: [
+                      or: [
                         {
-                          measure: 'visitors.source',
-                          operator: 'equals',
-                          values: ['some']
-                        }
-                      ]
+                          and: [
+                            {
+                              measure: "visitors.source",
+                              operator: "equals",
+                              values: ["some"],
+                            },
+                          ],
+                        },
+                        {
+                          and: [
+                            {
+                              dimension: "visitors_source",
+                              operator: "equals",
+                              values: ["google"],
+                            },
+                          ],
+                        },
+                      ],
                     },
-                    {
-                      and: [
-                        {
-                          dimension: 'visitors_source',
-                          operator: 'equals',
-                          values: ['google']
-                        }
-                      ]
-                    }
-                  ]
-                }]
-              }]
-          }],
-        order: [{
-          'visitors.visitor_count': 'desc'
-        }]
-      });
+                  ],
+                },
+              ],
+            },
+          ],
+          order: [
+            {
+              "visitors.visitor_count": "desc",
+            },
+          ],
+        }
+      );
 
       throw new Error();
     } catch (error) {
@@ -994,22 +1031,22 @@ describe('SQL Generation', () => {
     }
   });
 
-  it('long named aliased cubes doesn\'t throws', async () => {
+  it("long named aliased cubes doesn't throws", async () => {
     await aliasedCubesCompilers.compiler.compile();
     const aliasedQuery = new PostgresQuery(aliasedCubesCompilers, {
       dimensions: [
-        'MidLongLongLongLongLongLongLongLongLongLongNameCube.id',
-        'LeftLongLongLongLongLongLongLongLongLongLongNameCube.description',
+        "MidLongLongLongLongLongLongLongLongLongLongNameCube.id",
+        "LeftLongLongLongLongLongLongLongLongLongLongNameCube.description",
       ],
       measures: [
-        'RightLongLongLongLongLongLongLongLongLongLongNameCube.total_sum',
+        "RightLongLongLongLongLongLongLongLongLongLongNameCube.total_sum",
       ],
       order: [
-        ['MidLongLongLongLongLongLongLongLongLongLongNameCube.id', 'asc'],
+        ["MidLongLongLongLongLongLongLongLongLongLongNameCube.id", "asc"],
       ],
     });
 
-    return dbRunner.testQuery(aliasedQuery.buildSqlAndParams()).then(res => {
+    return dbRunner.testQuery(aliasedQuery.buildSqlAndParams()).then((res) => {
       expect(res.length).toEqual(6);
     });
   });

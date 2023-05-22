@@ -1,8 +1,4 @@
-import {
-  FileFilled,
-  MenuOutlined,
-  SlackOutlined,
-} from '@ant-design/icons';
+import { FileFilled, MenuOutlined, SlackOutlined } from '@ant-design/icons';
 import { Dropdown, Layout, Menu } from 'antd';
 import { useMediaQuery } from 'react-responsive';
 import { Link } from 'react-router-dom';
@@ -47,7 +43,7 @@ export default function Header({ selectedKeys }: Props) {
       {isDesktopOrLaptop && (
         <StyledMenu theme="light" mode="horizontal" selectedKeys={selectedKeys}>
           <StyledMenuItem key="/build">
-            <Link to="/build">Playground</Link>
+            <Link to="/build">Playground A</Link>
           </StyledMenuItem>
 
           <StyledMenuItem key="/schema">
@@ -90,7 +86,7 @@ export default function Header({ selectedKeys }: Props) {
             overlay={
               <Menu>
                 <Menu.Item key="/build">
-                  <Link to="/build">Playground</Link>
+                  <Link to="/build">Playground B</Link>
                 </Menu.Item>
 
                 <Menu.Item key="/schema">

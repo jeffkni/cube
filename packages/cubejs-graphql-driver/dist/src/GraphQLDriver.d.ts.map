@@ -1,0 +1,1 @@
+{"version":3,"file":"GraphQLDriver.d.ts","sourceRoot":"","sources":["../../src/GraphQLDriver.ts"],"names":[],"mappings":"AAEA,OAAO,EAAE,UAAU,EAAE,MAAM,6BAA6B,CAAC;AAGzD,qBAAa,aAAc,SAAQ,UAAU;;IAQ9B,cAAc,IAAI,OAAO,CAAC,IAAI,CAAC;IAM/B,KAAK,CAAC,KAAK,EAAE,MAAM,EAAE,MAAM,EAAE,EAAE;CAsB7C"}

@@ -208,7 +208,7 @@ export function ConnectionWizardPage({ history }) {
   if (isDriverInstallationInProgress && dependencyName) {
     return (
       <Layout>
-        <Title>Set Up a Database connection</Title>
+        <Title>Set Up a Database connection 1!</Title>
 
         <Space align="center" size="middle">
           <Spin />
@@ -222,7 +222,7 @@ export function ConnectionWizardPage({ history }) {
 
   return (
     <Layout>
-      <Title>Set Up a Database connection</Title>
+      <Title>Set Up a Database connection 2!</Title>
 
       {db ? (
         <>
@@ -257,8 +257,8 @@ export function ConnectionWizardPage({ history }) {
                 message={
                   <>
                     For advanced configuration, use the <b>cube.js</b> or{' '}
-                    <b>.env</b> configuration files in your Cube project.
-                    Note these files are on the mount volume if you are running
+                    <b>.env</b> configuration files in your Cube project. Note
+                    these files are on the mount volume if you are running
                     Docker.
                     <br />
                     <Typography.Link
